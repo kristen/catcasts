@@ -8,7 +8,8 @@
     <link rel="stylesheet" href="<%= Routes.static_path(@conn, "/css/app.css") %>"/>
   </head>
   <body>
-    <main role="main" class="container">
+    <%= render "_navigation.html", conn: @conn %>
+    <main role="main">
       <p role="alert"><%= get_flash(@conn, :info) %></p>
       <p role="alert"><%= get_flash(@conn, :error) %></p>
       <%= render @view_module, @view_template, assigns %>
