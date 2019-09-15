@@ -1,8 +1,8 @@
 defmodule CatcastsWeb.VideoControllerTest do
   use CatcastsWeb.ConnCase
 
-  @create_attrs %{duration: "some duration", thumbnail: "some thumbnail", title: "some title", video_id: "some video_id", view_count: 42}
-  @invalid_attrs %{duration: nil, thumbnail: nil, title: nil, video_id: nil, view_count: nil}
+  @create_attrs %{video_id: "https://www.youtube.com/watch?v=wZZ7oFKsKzY"}
+  @invalid_attrs %{video_id: ""}
 
   def fixture(:video) do
     {:ok, video} = Multimedia.create_video(@create_attrs)
@@ -25,17 +25,26 @@ defmodule CatcastsWeb.VideoControllerTest do
 
   describe "create video" do
     test "redirects to show when data is valid", %{conn: conn} do
-      conn = post(conn, Routes.video_path(conn, :create), video: @create_attrs)
+      user = user_fixture()
+
+      conn = 
+        conn
+        |> assign(:user, user)
+        |> post(Routes.video_path(conn, :create), video: @create_attrs)
 
       assert %{id: id} = redirected_params(conn)
       assert redirected_to(conn) == Routes.video_path(conn, :show, id)
 
-      conn = get(conn, Routes.video_path(conn, :show, id))
-      assert html_response(conn, 200) =~ "Show Video"
+      assert html_response(conn, 302) =~ "<html><body>You are being <a href=\"/videos/#{id}\">redirected</a>.</body></html>"
     end
 
     test "renders errors when data is invalid", %{conn: conn} do
-      conn = post(conn, Routes.video_path(conn, :create), video: @invalid_attrs)
+      user = user_fixture()
+
+      conn = conn
+        |> assign(:user, user)
+        |> post(Routes.video_path(conn, :create), video: @invalid_attrs)
+        
       assert html_response(conn, 200) =~ "New Video"
     end
   end
