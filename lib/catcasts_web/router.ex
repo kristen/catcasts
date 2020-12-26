@@ -10,14 +10,24 @@ defmodule CatcastsWeb.Router do
     plug Catcasts.Plugs.SetUser
   end
 
+  pipeline :auth do
+    plug CatcastsWeb.Plugs.RequireAuth
+  end
+
   pipeline :api do
     plug :accepts, ["json"]
   end
 
   scope "/", CatcastsWeb do
+    pipe_through [:browser, :auth]
+
+    resources "/videos", VideoController, only: [:new, :create, :delete]
+  end
+
+  scope "/", CatcastsWeb do
     pipe_through :browser
 
-    resources "/videos", VideoController, except: [:edit, :update]
+    resources "/videos", VideoController, only: [:index, :show]
     get "/", PageController, :index
   end
 
